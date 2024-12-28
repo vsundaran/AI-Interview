@@ -55,7 +55,7 @@ export default function Home() {
                 </Box>
             </Box>
             <br />
-
+            {/* 
             SPEECH <br />
             {
                 isListening ? "Listening" : "Start"
@@ -69,7 +69,7 @@ export default function Home() {
                 start recording
             </Button>
             <br />
-            <br />
+            <br /> */}
         </Box>
     );
 }
