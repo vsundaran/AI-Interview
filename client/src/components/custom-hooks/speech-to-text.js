@@ -4,7 +4,6 @@ const useSpeechToText = () => {
     const [text, setText] = useState('');
     const [isListening, setIsListening] = useState(false);
     const recognitionRef = useRef(null); // Store recognition instance
-    const silenceTimer = useRef(null); // Store silence timer
 
     const startListening = () => {
         if (!('webkitSpeechRecognition' in window)) {
@@ -22,9 +21,6 @@ const useSpeechToText = () => {
                 .map((result) => result[0].transcript)
                 .join('');
             setText(transcript);
-
-            // Reset silence timer on every result
-            resetSilenceTimer();
         };
 
         recognitionRef.current.onerror = (event) => {
@@ -39,18 +35,6 @@ const useSpeechToText = () => {
 
         recognitionRef.current.start();
         setIsListening(true);
-        resetSilenceTimer(); // Start silence timer
-    };
-
-    const resetSilenceTimer = () => {
-        if (silenceTimer.current) {
-            clearTimeout(silenceTimer.current);
-        }
-
-        silenceTimer.current = setTimeout(() => {
-            console.log('No speech detected for 20 seconds. Stopping recognition.');
-            stopListening();
-        }, 1000 * 20); // 10 seconds timeout
     };
 
     const stopListening = () => {
@@ -58,16 +42,14 @@ const useSpeechToText = () => {
             recognitionRef.current.stop();
             recognitionRef.current = null; // Clear recognition instance
         }
-
-        if (silenceTimer.current) {
-            clearTimeout(silenceTimer.current);
-            silenceTimer.current = null; // Clear silence timer
-        }
-
         setIsListening(false);
     };
 
-    return { isListening, text, startListening, stopListening };
+    const textReset = () => {
+        setText('');
+    };
+
+    return { isListening, text, startListening, stopListening, textReset };
 };
 
 export default useSpeechToText;
