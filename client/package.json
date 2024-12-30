@@ -22,9 +22,11 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.0.2",
     "react-scripts": "^5.0.1",
+    "react-speech-recognition": "^3.10.0",
     "react-spinners": "^0.15.0",
     "react-type-animation": "^3.2.0",
     "recharts": "^2.15.0",
+    "voice-activity-detection": "^0.0.5",
     "web-vitals": "^4.2.4"
   },
   "scripts": {

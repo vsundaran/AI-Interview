@@ -20,6 +20,7 @@ import { NoRoute } from "./components/views/no-route";
 //Redux
 import { Provider } from 'react-redux'
 import { store } from "./redux/store/store";
+// import SpeechToText from "./components/views/speech";
 
 // Lazy import for views
 const Home = React.lazy(() => import("./components/views/home"));
@@ -42,6 +43,7 @@ function App() {
                   <Route element={<Interview />} path={`${ROUTE_URL.INETRVIEW}`} />
                   <Route element={<Dashboard />} path={`${ROUTE_URL.DASHBOARD}`} />
                   <Route element={<NoRoute />} path={`${ROUTE_URL.NO_ROUTE}`} />
+                  {/* <Route element={<SpeechToText />} path={`/speech`} /> */}
                 </Routes>
               </Suspense>
             </Router>
