@@ -20,6 +20,7 @@ import useSpeechToText from "../custom-hooks/speech-to-text";
 import { formateQuestions } from "../api-response-formater/questions";
 import useSilenceChecker from "./speech";
 import { useLocation } from "react-router-dom";
+import useAIChat from "../custom-hooks/question";
 
 export default function Interview() {
     let [coversation, setConversation] = useState(() => {
@@ -70,12 +71,23 @@ export default function Interview() {
     }, [location.state]);
 
 
+    const { chatHistory, sendMessage, error } = useAIChat();
     let { isListening, startListening, stopListening, text, textReset } = useSpeechToText();
     let { startRecording, stopRecording, isSpeaking, isRecording, vadValue } = useSilenceChecker()
 
+
+    const handleSend = (input = '') => {
+        if (input.trim()) {
+            sendMessage(input);;
+        }
+    };
+
     useEffect(() => {
+        console.log(jobInfo, "jobInfo")
         setLoading(prev => ({ ...prev, AI: true }));
         let quearyString = formatAIPrompt(jobInfo);
+        handleSend(quearyString);
+
         // GET_QUESTIONS({ inputs: quearyString }, (response) => {
         //     setLoading(prev => ({ ...prev, AI: false }));
         //     console.log(response, "response");
@@ -83,10 +95,10 @@ export default function Interview() {
         //     setConversation(prev => question);
         //     setLoading(prev => ({ ...prev, candidate: true }));
         // });
-        setTimeout(() => {
-            setLoading(prev => ({ AI: false, candidate: true }));
-            startVoiceRecogniation();
-        }, 2000);
+        // setTimeout(() => {
+        //     setLoading(prev => ({ AI: false, candidate: true }));
+        //     startVoiceRecogniation();
+        // }, 2000);
     }, []);
 
     const startVoiceRecogniation = () => {
@@ -122,6 +134,18 @@ export default function Interview() {
             <br />
             isSpeaking : {isSpeaking ? "Yes" : "no"}
             <br />
+
+            {chatHistory.map((msg, index) => (
+                <p
+                    key={index}
+                    style={{
+                        color: msg.role === 'user' ? 'blue' : 'green'
+                    }}
+                >
+                    <strong>{msg.role === 'user' ? 'You' : 'AI'}:</strong> {msg.content}
+                </p>
+            ))}
+
             {coversation.map((element, index) => (
                 <Box key={`coversation-${index}`}>
                     {/*Candidate Answer */}

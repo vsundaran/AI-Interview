@@ -18,6 +18,6 @@ Generate interview questions for the following candidate profile:
 **Job Description:**  
 ${formData.jobDescription}
 
-Generate a first technical interview questions relevant to the above profile.
+Generate one technical question relevant to the above profile.
 `;
 };
