@@ -20,6 +20,7 @@ import { NoRoute } from "./components/views/no-route";
 //Redux
 import { Provider } from 'react-redux'
 import { store } from "./redux/store/store";
+import { SpeechProvider } from "./context/SpeechContext";
 // import SpeechToText from "./components/views/speech";
 
 // Lazy import for views
@@ -36,17 +37,19 @@ function App() {
           {/* Place your header */}
           <AppHeader />
           <Box marginTop={3}>
-            <Router>
-              <Suspense fallback={<Loading />}>
-                <Routes>
-                  <Route element={<Home />} path={`${ROUTE_URL.HOME}`} />
-                  <Route element={<Interview />} path={`${ROUTE_URL.INETRVIEW}`} />
-                  <Route element={<Dashboard />} path={`${ROUTE_URL.DASHBOARD}`} />
-                  <Route element={<NoRoute />} path={`${ROUTE_URL.NO_ROUTE}`} />
-                  {/* <Route element={<SpeechToText />} path={`/speech`} /> */}
-                </Routes>
-              </Suspense>
-            </Router>
+            <SpeechProvider>
+              <Router>
+                <Suspense fallback={<Loading />}>
+                  <Routes>
+                    <Route element={<Home />} path={`${ROUTE_URL.HOME}`} />
+                    <Route element={<Interview />} path={`${ROUTE_URL.INETRVIEW}`} />
+                    <Route element={<Dashboard />} path={`${ROUTE_URL.DASHBOARD}`} />
+                    <Route element={<NoRoute />} path={`${ROUTE_URL.NO_ROUTE}`} />
+                    {/* <Route element={<SpeechToText />} path={`/speech`} /> */}
+                  </Routes>
+                </Suspense>
+              </Router>
+            </SpeechProvider>
           </Box>
         </Container>
       </Box>

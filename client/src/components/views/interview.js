@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 // Mui elements
 import { Box, Typography } from "@mui/material";
 
@@ -13,53 +13,17 @@ import { useSelector } from "react-redux";
 import { TypeAnimation } from "react-type-animation";
 import { SyncLoader, PuffLoader } from "react-spinners";
 import { formatAIPrompt } from "../../utills/formatPrompt";
-import { GET_QUESTIONS } from "../../helper/end-points";
 
 //custom-hooks
 import useSpeechToText from "../custom-hooks/speech-to-text";
-import { formateQuestions } from "../api-response-formater/questions";
 import useSilenceChecker from "./speech";
 import { useLocation } from "react-router-dom";
 import useAIChat from "../custom-hooks/question";
 
 export default function Interview() {
-    let [coversation, setConversation] = useState(() => {
-        return [
-            // the below object will alway be in the array for loading and recording purpose
-            // If the candidate is needs to answer, make the message sender as candidate and loading canddiate should true
-            // same for the AI
-            {
-                message_sender: "candidate",
-                message: `the below object will alway be in the array for loading and recording purpose
-            If the candidate is needs to answer, make the message sender as candidate and loading canddiate should true
-            same for the AI`,
-            },
-            {
-                message_sender: "AI",
-                message: `the below object will alway be in the array for loading and recording purpose
-            If the candidate is needs to answer, make the message sender as candidate and loading canddiate should true
-            same for the AI`,
-            },
-            {
-                message_sender: "candidate",
-                message: `the below object will alway be in the array for loading and recording purpose
-            If the candidate is needs to answer, make the message sender as candidate and loading canddiate should true
-            same for the AI`,
-            },
-            {
-                message_sender: "AI",
-                message: `the below object will alway be in the array for loading and recording purpose
-            If the candidate is needs to answer, make the message sender as candidate and loading canddiate should true
-            same for the AI`,
-            },
-        ];
-    });
     let jobInfo = useSelector((state) => state.job_info);
 
-    let [loading, setLoading] = useState({
-        AI: false,
-        candidate: false,
-    });
+    let [candidateLoading, setCandidateLoading] = useState(false);
 
     const location = useLocation();
 
@@ -68,40 +32,28 @@ export default function Interview() {
         if (location.state?.triggerEvent) {
             startRecording();
         }
+        // eslint-disable-next-line
     }, [location.state]);
 
 
-    const { chatHistory, sendMessage, error } = useAIChat();
+    const { chatHistory, sendMessage, error, isLoading, initializeChat } = useAIChat();
     let { isListening, startListening, stopListening, text, textReset } = useSpeechToText();
     let { startRecording, stopRecording, isSpeaking, isRecording, vadValue } = useSilenceChecker()
 
 
-    const handleSend = (input = '') => {
+    const handleSend = (input = '', excludeText = false) => {
         if (input.trim()) {
-            sendMessage(input);;
+            sendMessage(input, excludeText);
         }
     };
 
     useEffect(() => {
-        console.log(jobInfo, "jobInfo")
-        setLoading(prev => ({ ...prev, AI: true }));
         let quearyString = formatAIPrompt(jobInfo);
-        handleSend(quearyString);
-
-        // GET_QUESTIONS({ inputs: quearyString }, (response) => {
-        //     setLoading(prev => ({ ...prev, AI: false }));
-        //     console.log(response, "response");
-        //     let question = formateQuestions(response);
-        //     setConversation(prev => question);
-        //     setLoading(prev => ({ ...prev, candidate: true }));
-        // });
-        // setTimeout(() => {
-        //     setLoading(prev => ({ AI: false, candidate: true }));
-        //     startVoiceRecogniation();
-        // }, 2000);
+        handleSend(quearyString, true);
     }, []);
 
     const startVoiceRecogniation = () => {
+        setCandidateLoading(prev => true)
         startListening();
     }
 
@@ -109,7 +61,7 @@ export default function Interview() {
         console.log(text, "text");
         stopListening();
         textReset();
-        setLoading(prev => ({ AI: true, candidate: false }))
+        setCandidateLoading(prev => false)
     };
 
     let [timer, setTimer] = useState();
@@ -125,32 +77,16 @@ export default function Interview() {
                 stopVoiceRecogniation();
             }, 5000))
         }
+        // eslint-disable-next-line
     }, [isSpeaking]);
 
     return (
         <Box>
-            <br />
-            vadValue : {vadValue}
-            <br />
-            isSpeaking : {isSpeaking ? "Yes" : "no"}
-            <br />
-
             {chatHistory.map((msg, index) => (
-                <p
-                    key={index}
-                    style={{
-                        color: msg.role === 'user' ? 'blue' : 'green'
-                    }}
-                >
-                    <strong>{msg.role === 'user' ? 'You' : 'AI'}:</strong> {msg.content}
-                </p>
-            ))}
-
-            {coversation.map((element, index) => (
                 <Box key={`coversation-${index}`}>
                     {/*Candidate Answer */}
                     <Box
-                        display={`${element?.message_sender === "candidate" ? "flex" : "none"
+                        display={`${msg.role === 'user' ? "flex" : "none"
                             }`}
                         justifyContent={"end"}
                         marginBottom={4}
@@ -162,17 +98,7 @@ export default function Interview() {
                             sx={{ maxWidth: { xs: "90%", md: "70%", lg: "60%" } }}
                         >
                             <Typography variant="body1" color="white">
-                                {index + 1 === coversation.length
-                                    ? (
-                                        <TypeAnimation
-                                            sequence={[`${element?.message || ""}`]}
-                                            wrapper="span"
-                                            speed={80}
-                                            cursor={false}
-                                        />
-                                    ) : (
-                                        `${element?.message || ""}`
-                                    )}
+                                {msg.content || ""}
                             </Typography>
                         </Box>
                     </Box>
@@ -180,34 +106,35 @@ export default function Interview() {
                     {/* AI Question */}
                     <Box
                         marginBottom={4}
-                        display={`${element.message_sender === "AI" ? "flex" : "none"}`}
+                        display={`${msg.role !== 'user' ? "flex" : "none"}`}
                     >
                         <Box display={"flex"} alignItems={"start"} gap={1}>
                             <AppLogo size="small" />
                             <Typography variant="body1">
 
-                                {index + 1 === coversation.length
+                                {index + 1 === chatHistory.length
                                     ? (
                                         <TypeAnimation
-                                            sequence={[`${element?.message || ""}`]}
+                                            sequence={[`${msg.content || ""}`]}
                                             wrapper="span"
-                                            speed={80}
+                                            speed={50}
                                             cursor={false}
 
                                         />
                                     ) : (
-                                        `${element?.message || ""}`
+                                        `${msg.content || ""}`
                                     )}
                             </Typography>
                         </Box>
                     </Box>
                 </Box>
             ))}
+
             {/* Loading box */}
             <Box>
                 {/*Candidate Loading */}
                 <Box
-                    display={`${loading.candidate ? "flex" : "none"
+                    display={`${candidateLoading ? "flex" : "none"
                         }`}
                     justifyContent={"end"}
                     marginBottom={4}
@@ -230,7 +157,7 @@ export default function Interview() {
                 {/* AI Loading */}
                 <Box
                     marginBottom={4}
-                    display={`${loading.AI ? "flex" : "none"}`}
+                    display={`${isLoading ? "flex" : "none"}`}
                 >
                     <Box display={"flex"} alignItems={"start"} gap={1}>
                         <AppLogo size="small" />
@@ -243,14 +170,6 @@ export default function Interview() {
                     </Box>
                 </Box>
             </Box>
-
-            {/* <TypeAnimation
-                sequence={[`${text || ""}`]}
-                wrapper="span"
-                speed={80}
-                cursor={false}
-            /> */}
-
         </Box>
     );
 }

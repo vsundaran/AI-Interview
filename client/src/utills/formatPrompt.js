@@ -1,23 +1,34 @@
 export const formatAIPrompt = (formData = {}) => {
     return `
-Generate interview questions for the following candidate profile:
+Based on the following candidate profile and job details, generate one **insightful and role-specific technical question** that assesses the candidate's skills, experience, and suitability for the role.
 
-**Job Role:** ${formData.jobRole}  
-**Experience:** ${formData.experienced}  
-**Years of Experience:** ${formData.yearsOfExperience}  
-**Technology:** ${formData.Technology}  
-**Skills:** ${formData.skills}  
-**Company Preferences:** ${formData.companyName}  
-**Expected Salary Level:** ${formData.salaryLevel}  
-**Degree:** ${formData.degree}  
-**Education Background:** ${formData.education}  
-**Candidate Name:** ${formData.name}  
-**Last Project Name:** ${formData.lastProjectName}  
-**Interview Type:** ${formData.interviewType}  
+### 📌 **Candidate Profile:**
+- **Candidate Name:** ${formData.name || "No info included"}
+- **Job Role:** ${formData.jobRole || "No info included"}
+- **Experience Level:** ${formData.experienced || "No info included"}
+- **Years of Experience:** ${formData.yearsOfExperience || "No info included"}
+- **Technical Skills:** ${formData.skills || "No info included"}
+- **Technology Stack:** ${formData.Technology || "No info included"}
+- **Degree:** ${formData.degree || "No info included"}
+- **Education Background:** ${formData.education || "Not included"}
+- **Last Project Name:** ${formData.lastProjectName || "No project included"}
 
-**Job Description:**  
-${formData.jobDescription}
+### 🏢 **Company Preferences:**
+- **Preferred Company:** ${formData.companyName || "Midlevel Companies"}
+- **Expected Salary Level:** ${formData.salaryLevel || "Desent"}
 
-Generate one technical question relevant to the above profile.
-`;
+### 📄 **Job Description:**
+${formData.jobDescription || "Not included"}
+
+### 🎯 **Interview Context:**
+- **Interview Type:** ${formData.interviewType || "General"}
+
+The technical question should:
+1. Be relevant to the candidate's experience and technical skills.
+2. Assess problem-solving, optimization, or practical application of technology.
+3. Reflect real-world scenarios or challenges related to the job role.
+4. Be open-ended to encourage detailed responses.
+
+**Provide only the question in the response, without any explanation or intent behind it. Do not include words like 'Question:', 'Intent:', or any additional context—just the question itself.**
+    `;
 };
