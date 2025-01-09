@@ -1,16 +1,32 @@
 import React, { createContext, useContext, useRef } from 'react';
 import { useSpeechSynthesis } from 'react-speech-kit';
+import { updateLoading } from '../redux/slice/loading-slice';
+import { useDispatch } from 'react-redux';
 
 const SpeechContext = createContext();
 
 export const SpeechProvider = ({ children }) => {
-    const { speak, voices, supported, cancel, speaking } = useSpeechSynthesis();
+    let DISPATCH = useDispatch();
+
+    let index = 0;
+    let chunks = [] // Split into sentences
+
+    const onEnd = () => {
+        index++;
+        if (index < chunks.length) {
+            speakChunk(chunks[index]);
+        } else {
+            DISPATCH(updateLoading({ loadingState: true, key: "candidate" }))
+        }
+    };
+
+    const { speak, voices, supported, cancel, speaking } = useSpeechSynthesis({ onEnd });
     const selectedVoice = useRef(null);
     const isInitialized = useRef(false);
 
     const initializeSpeech = () => {
         if (!isInitialized.current && voices.length > 0) {
-            const googleUSVoice = voices.find(voice => voice.name === 'Google US English');
+            const googleUSVoice = voices.find((voice) => voice.name === 'Google US English');
             if (googleUSVoice) {
                 selectedVoice.current = googleUSVoice;
                 isInitialized.current = true;
@@ -18,41 +34,21 @@ export const SpeechProvider = ({ children }) => {
         }
     };
 
+    const speakChunk = (chunk = "") => {
+        speak({
+            text: chunk,
+            voice: selectedVoice.current,
+        });
+    }
+
     const startSpeaking = (message = '') => {
         if (!isInitialized.current) {
             console.warn('Speech synthesis is not initialized yet.');
             return;
         }
-        // speak({
-        //     text: message,
-        //     voice: selectedVoice.current,
-        //     onEnd: () => {
-        //         console.log("Completed")
-        //     }
-        // });
-
-        if (!isInitialized.current) {
-            console.warn('Speech synthesis is not initialized yet.');
-            return;
-        }
-
-        const chunks = message.match(/[^.!?]+[.!?]+|[^.!?]+/g) || [message]; // Split into sentences
-
-        let index = 0;
-        console.log(chunks, "chunks")
-        const speakNextChunk = () => {
-            if (index < chunks.length) {
-                speak({
-                    text: chunks[index],
-                    voice: selectedVoice.current,
-                    onEnd: () => {
-                        index++;
-                        speakNextChunk(); // Speak next chunk after current one ends
-                    },
-                });
-            }
-        };
-        speakNextChunk();
+        chunks = message.match(/[^.!?]+[.!?]+|[^.!?]+/g) || [message]; // Split into sentences
+        // const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+/g) || [text]; // Split into sentences
+        speakChunk(chunks[index])
     };
 
     return (
