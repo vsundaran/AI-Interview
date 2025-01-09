@@ -10,25 +10,17 @@ import FormLabel from "@mui/material/FormLabel";
 //Redux
 import { useDispatch, useSelector } from "react-redux";
 import { updateField } from "../../../redux/slice/job-info-slice";
-// router
-import { useNavigate } from "react-router-dom";
 
 export default function JobInfo() {
 
     let jobInfo = useSelector(state => state.job_info);
     let DISPATCH = useDispatch();
-    let Navigate = useNavigate();
 
-    const handleSubmit = (event) => {
-        event?.preventDefault();
-        Navigate('/interview')
-    };
     const handleUpdate = (event, key) => {
         DISPATCH(updateField({ string: event.target.value, key }))
     }
 
     return (
-        // <form onSubmit={handleSubmit}>
         <Stack spacing={2}>
             <Box sx={{ display: { xs: "block", md: "flex" }, gap: 4 }}>
                 <TextField
@@ -59,13 +51,13 @@ export default function JobInfo() {
                     margin: 0,
                 }}
             >
-                <TextField sx={{ display: jobInfo?.experienced == "yes" ? "block" : "none" }}
+                <TextField sx={{ display: jobInfo?.experienced === "yes" ? "block" : "none" }}
                     value={jobInfo?.yearsOfExperience || ""}
                     size="small"
                     fullWidth
                     label="Years of experience"
                     variant="standard"
-                    required={jobInfo?.experienced == "yes"}
+                    required={jobInfo?.experienced === "yes"}
                     onChange={(event) => handleUpdate(event, "yearsOfExperience")}
                 />
                 <TextField

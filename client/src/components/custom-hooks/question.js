@@ -35,7 +35,7 @@ const useAIChat = () => {
         try {
             const chatCompletion = await client.chatCompletion({
                 model: "mistralai/Mistral-7B-Instruct-v0.3",
-                messages: updatedHistory,
+                messages: [{ role: 'user', content: userMessage }],
                 max_tokens: 500
             });
 

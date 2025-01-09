@@ -29,6 +29,6 @@ The technical question should:
 3. Reflect real-world scenarios or challenges related to the job role.
 4. Be open-ended to encourage detailed responses.
 
-**Provide only the question in the response, without any explanation or intent behind it. Do not include words like 'Question:', 'Intent:', or any additional context—just the question itself.**
+**Provide only the question in the response, without any explanation or intent behind it. Do not include words like 'Question:', 'Intent:', or any additional context—just the question itself. The question must not more than 35 words.**
     `;
 };

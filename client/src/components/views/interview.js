@@ -8,7 +8,7 @@ import { APP_COLORS } from "../../theme/colors";
 // Icons and logo
 import AppLogo from "../elements/app-logo/app-logo";
 // Redux
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 //Animation
 import { TypeAnimation } from "react-type-animation";
 import { SyncLoader, PuffLoader } from "react-spinners";
@@ -19,13 +19,14 @@ import useSpeechToText from "../custom-hooks/speech-to-text";
 import useSilenceChecker from "./speech";
 import { useLocation } from "react-router-dom";
 import useAIChat from "../custom-hooks/question";
+import { updateLoading } from "../../redux/slice/loading-slice";
 
 export default function Interview() {
     let jobInfo = useSelector((state) => state.job_info);
-
-    let [candidateLoading, setCandidateLoading] = useState(false);
+    let { candidate } = useSelector((state) => state.loading);
 
     const location = useLocation();
+    const DISPATCH = useDispatch()
 
     useEffect(() => {
         // Check if state contains the triggerEvent flag
@@ -36,7 +37,7 @@ export default function Interview() {
     }, [location.state]);
 
 
-    const { chatHistory, sendMessage, error, isLoading, initializeChat } = useAIChat();
+    const { chatHistory, sendMessage, isLoading } = useAIChat();
     let { isListening, startListening, stopListening, text, textReset } = useSpeechToText();
     let { startRecording, stopRecording, isSpeaking, isRecording, vadValue } = useSilenceChecker()
 
@@ -48,37 +49,56 @@ export default function Interview() {
     };
 
     useEffect(() => {
+        sendMessage(text, false);
+        DISPATCH(updateLoading({ loadingState: false, key: "candidate" }))
+        // eslint-disable-next-line
+    }, [text])
+
+    useEffect(() => {
         let quearyString = formatAIPrompt(jobInfo);
         handleSend(quearyString, true);
+        // eslint-disable-next-line
     }, []);
 
     const startVoiceRecogniation = () => {
-        setCandidateLoading(prev => true)
         startListening();
     }
 
     const stopVoiceRecogniation = () => {
         console.log(text, "text");
         stopListening();
+        DISPATCH(updateLoading({ loadingState: false, key: "candidate" }))
         textReset();
-        setCandidateLoading(prev => false)
     };
 
-    let [timer, setTimer] = useState();
+    const [timer, setTimer] = useState(null);
 
     useEffect(() => {
-        console.log(isSpeaking, "isSpeaking toggles")
-        if (timer) {
-            clearTimeout(timer);
+        console.log("isSpeaking", isSpeaking)
+        if (candidate && isSpeaking && isListening) {
+            console.log("User continious the interview")
+            if (timer) {
+                clearTimeout(timer)
+            }
+        };
+        if (candidate && isSpeaking && !isListening) {
+            console.log("Voice recording started")
+            startVoiceRecogniation();
+        } else {
+            if (!isSpeaking && candidate && isListening) {
+                setTimer(perv => setTimeout(() => {
+                    console.log("User not spok for last 10 seconds, recording stoped")
+                    stopVoiceRecogniation()
+                }, 10000))
+            }
         }
-        if (!isSpeaking && isListening) {
-            setTimer(prev => setTimeout(() => {
-                console.log("Timout runs");
-                stopVoiceRecogniation();
-            }, 5000))
-        }
+        return () => {
+            if (timer) {
+                clearTimeout(timer)
+            }
+        };
         // eslint-disable-next-line
-    }, [isSpeaking]);
+    }, [isSpeaking, candidate]);
 
     return (
         <Box>
@@ -134,7 +154,7 @@ export default function Interview() {
             <Box>
                 {/*Candidate Loading */}
                 <Box
-                    display={`${candidateLoading ? "flex" : "none"
+                    display={`${candidate ? "flex" : "none"
                         }`}
                     justifyContent={"end"}
                     marginBottom={4}
