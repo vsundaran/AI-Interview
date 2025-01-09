@@ -11,11 +11,14 @@ import JobInfo from "../elements/job-info/job-info";
 import AdditionalInfo from "../elements/additional-info/additional-info";
 import { ColorButton } from "../elements/button";
 import { useNavigate } from "react-router-dom";
+import { useSpeech } from "../../context/SpeechContext";
 
 export default function Home() {
     //states and funcs
     const [value, setValue] = React.useState("1");
     let Navigate = useNavigate();
+
+    const { initializeSpeech } = useSpeech();
 
     //event handlers
     const handleChange = (event, newValue) => {
@@ -24,10 +27,9 @@ export default function Home() {
 
     const handleSubmit = (event) => {
         event?.preventDefault();
+        initializeSpeech(); // Initialize before navigating
         Navigate('/interview', { state: { triggerEvent: true } });
-
     };
-
 
     return (
         <Box>
