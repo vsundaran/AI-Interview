@@ -21,6 +21,7 @@ import { NoRoute } from "./components/views/no-route";
 import { Provider } from 'react-redux'
 import { store } from "./redux/store/store";
 import { SpeechProvider } from "./context/SpeechContext";
+import BodyLanguageAnalyzer from "./components/elements/body-language-analyzer/body-language-analyzer";
 // import SpeechToText from "./components/views/speech";
 
 // Lazy import for views
@@ -45,7 +46,7 @@ function App() {
                     <Route element={<Interview />} path={`${ROUTE_URL.INETRVIEW}`} />
                     <Route element={<Dashboard />} path={`${ROUTE_URL.DASHBOARD}`} />
                     <Route element={<NoRoute />} path={`${ROUTE_URL.NO_ROUTE}`} />
-                    {/* <Route element={<SpeechToText />} path={`/speech`} /> */}
+                    <Route element={<BodyLanguageAnalyzer />} path={`/BodyLanguageAnalyzer`} />
                   </Routes>
                 </Suspense>
               </Router>
