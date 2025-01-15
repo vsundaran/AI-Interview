@@ -42,10 +42,10 @@ const BodyLanguageAnalyzer = () => {
             canvasRef.current.width = displaySize.width;
             canvasRef.current.height = displaySize.height;
 
-            console.log(`/logo2.jpg`, "Logo")
+            console.log(`/logo3.png`, "Logo")
 
             // Use the image from the public folder (already tested as accessible)
-            const image = await faceapi.fetchImage('/logo2.jpg'); // Correct path from public folder
+            const image = await faceapi.fetchImage('/logo3.png'); // Correct path from public folder
             const detections = await faceapi.detectAllFaces(image).withFaceLandmarks().withFaceExpressions();
 
             console.log("detections", detections); // Log detections
@@ -113,8 +113,8 @@ const BodyLanguageAnalyzer = () => {
 
     // Simple method to calculate expression score (positive emotions)
     function calculateExpressionScore(expressions) {
-        const positiveExpressions = ["happy", "surprised"];
-        const negativeExpressions = ["angry", "sad", "disgusted"];
+        const positiveExpressions = ["happy", "surprised", "neutral"];
+        const negativeExpressions = ["angry", "sad", "disgusted", "fearful"];
 
         let score = 0;
 
