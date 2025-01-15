@@ -1,58 +1,29 @@
-import React, { createContext, useContext, useRef } from 'react';
-import { useSpeechSynthesis } from 'react-speech-kit';
+import React, { createContext, useContext, useState } from 'react';
 import { updateLoading } from '../redux/slice/loading-slice';
 import { useDispatch } from 'react-redux';
 
 const SpeechContext = createContext();
 
 export const SpeechProvider = ({ children }) => {
-    let DISPATCH = useDispatch();
-
-    let index = 0;
-    let chunks = [] // Split into sentences
-
-    const onEnd = () => {
-        index++;
-        if (index < chunks.length) {
-            speakChunk(chunks[index]);
-        } else {
-            DISPATCH(updateLoading({ loadingState: true, key: "candidate" }))
-        }
-    };
-
-    const { speak, voices, supported, cancel, speaking } = useSpeechSynthesis({ onEnd });
-    const selectedVoice = useRef(null);
-    const isInitialized = useRef(false);
-
-    const initializeSpeech = () => {
-        if (!isInitialized.current && voices.length > 0) {
-            const googleUSVoice = voices.find((voice) => voice.name === 'Google US English');
-            if (googleUSVoice) {
-                selectedVoice.current = googleUSVoice;
-                isInitialized.current = true;
-            }
-        }
-    };
-
-    const speakChunk = (chunk = "") => {
-        speak({
-            text: chunk,
-            voice: selectedVoice.current,
-        });
-    }
+    const DISPATCH = useDispatch();
+    let [speaking, setSpeaking] = useState(false)
 
     const startSpeaking = (message = '') => {
-        if (!isInitialized.current) {
-            console.warn('Speech synthesis is not initialized yet.');
-            return;
-        }
-        chunks = message.match(/[^.!?]+[.!?]+|[^.!?]+/g) || [message]; // Split into sentences
-        // const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+/g) || [text]; // Split into sentences
-        speakChunk(chunks[index])
+        /* global responsiveVoice */
+        responsiveVoice.speak(message, "UK English Male", {
+            onend: () => {
+                DISPATCH(updateLoading({ loadingState: true, key: "candidate" }));
+                setSpeaking(false)
+            },
+            onerror: () => {
+                DISPATCH(updateLoading({ loadingState: true, key: "candidate" }));
+                setSpeaking(false)
+            },
+        });
+        setSpeaking(true)
     };
-
     return (
-        <SpeechContext.Provider value={{ initializeSpeech, startSpeaking, cancel, speaking, supported }}>
+        <SpeechContext.Provider value={{ startSpeaking, speaking }}>
             {children}
         </SpeechContext.Provider>
     );

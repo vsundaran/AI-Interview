@@ -15,11 +15,12 @@ import { SyncLoader, PuffLoader } from "react-spinners";
 import { formatAIPrompt } from "../../utills/formatPrompt";
 
 //custom-hooks
-import useSpeechToText from "../custom-hooks/speech-to-text";
+import useSpeechToText from "../custom-hooks/useSpeechToText";
 import useSilenceChecker from "./speech";
 import { useLocation } from "react-router-dom";
-import useAIChat from "../custom-hooks/question";
+import useAIChat from "../custom-hooks/useAIChat";
 import { updateLoading } from "../../redux/slice/loading-slice";
+import useToneAnalysis from "../custom-hooks/useToneAnalysis";
 
 export default function Interview() {
     let jobInfo = useSelector((state) => state.job_info);
@@ -40,7 +41,7 @@ export default function Interview() {
     const { chatHistory, sendMessage, isLoading } = useAIChat();
     let { isListening, startListening, stopListening, text, textReset } = useSpeechToText();
     let { startRecording, stopRecording, isSpeaking, isRecording, vadValue } = useSilenceChecker()
-
+    let { analyzeTone, toneResult } = useToneAnalysis()
 
     const handleSend = (input = '', excludeText = false) => {
         if (input.trim()) {
@@ -50,9 +51,15 @@ export default function Interview() {
 
     useEffect(() => {
         sendMessage(text, false);
-        DISPATCH(updateLoading({ loadingState: false, key: "candidate" }))
+        DISPATCH(updateLoading({ loadingState: false, key: "candidate" }));
+        analyzeTone(text)
         // eslint-disable-next-line
-    }, [text])
+    }, [text]);
+
+    useEffect(() => {
+        // The tone result should save on the backend or context for result
+        // eslint-disable-next-line
+    }, [toneResult])
 
     useEffect(() => {
         let quearyString = formatAIPrompt(jobInfo);
