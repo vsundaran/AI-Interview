@@ -1,7 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import vad from 'voice-activity-detection';
-import { useLocation } from 'react-router-dom';
-
 
 export const useSilenceChecker = () => {
     const [isRecording, setIsRecording] = useState(false);
@@ -10,6 +8,7 @@ export const useSilenceChecker = () => {
     const audioContextRef = useRef(null);
     const isStartedRef = useRef(false);
 
+    const NOISE_THRESHOLD = 0.9; // Adjust based on your environment
 
     async function startRecording() {
         try {
@@ -26,15 +25,23 @@ export const useSilenceChecker = () => {
             // Start VAD with stream and audioContext
             vad(audioContextRef.current, stream, {
                 onVoiceStart: () => {
-                    // console.log('Voice detected');
-                    setIsSpeaking(true);
+                    // Only set isSpeaking to true if vadValue exceeds the threshold
+                    if (vadValue > NOISE_THRESHOLD) {
+                        setIsSpeaking(true);
+                    }
                 },
                 onVoiceStop: () => {
-                    // console.log('Voice stopped');
                     setIsSpeaking(false);
                 },
                 onUpdate: (val) => {
                     setVadValue(val);
+
+                    // Dynamically handle noise filtering in case voice detection is too sensitive
+                    if (val > NOISE_THRESHOLD && !isSpeaking) {
+                        setIsSpeaking(true);
+                    } else if (val <= NOISE_THRESHOLD && isSpeaking) {
+                        setIsSpeaking(false);
+                    }
                 },
             });
 
@@ -52,7 +59,7 @@ export const useSilenceChecker = () => {
         }
     }
 
-    return { startRecording, stopRecording, isRecording, isSpeaking, vadValue }
+    return { startRecording, stopRecording, isRecording, isSpeaking, vadValue };
 };
 
 export default useSilenceChecker;
