@@ -15,16 +15,16 @@ import { SyncLoader, PuffLoader } from "react-spinners";
 import { formatAIPrompt } from "../../utills/formatPrompt";
 
 //custom-hooks
-import useSpeechToText from "../custom-hooks/useSpeechToText";
 import useSilenceChecker from "./speech";
 import { useLocation } from "react-router-dom";
 import useAIChat from "../custom-hooks/useAIChat";
 import { updateLoading } from "../../redux/slice/loading-slice";
 import useToneAnalysis from "../custom-hooks/useToneAnalysis";
+import useVoiceRecorder from "../custom-hooks/useVoiceRecorder";
 
 export default function Interview() {
     let jobInfo = useSelector((state) => state.job_info);
-    let { candidate } = useSelector((state) => state.loading);
+    let { candidate, voiceProcessing } = useSelector((state) => state.loading);
 
     const location = useLocation();
     const DISPATCH = useDispatch()
@@ -39,9 +39,11 @@ export default function Interview() {
 
 
     const { chatHistory, sendMessage, isLoading } = useAIChat();
-    let { isListening, startListening, stopListening, text, textReset } = useSpeechToText();
-    let { startRecording, stopRecording, isSpeaking, isRecording, vadValue } = useSilenceChecker()
-    let { analyzeTone, toneResult } = useToneAnalysis()
+    let { startRecording, isSpeaking } = useSilenceChecker()
+    let { analyzeTone, toneResult } = useToneAnalysis();
+
+
+    const { isListening, startListening, text, stopListening } = useVoiceRecorder();
 
     const handleSend = (input = '', excludeText = false) => {
         if (input.trim()) {
@@ -50,9 +52,12 @@ export default function Interview() {
     };
 
     useEffect(() => {
-        sendMessage(text, false);
-        DISPATCH(updateLoading({ loadingState: false, key: "candidate" }));
-        analyzeTone(text)
+        if (text) {
+            sendMessage(text, false);
+            DISPATCH(updateLoading({ loadingState: false, key: "candidate" }));
+            DISPATCH(updateLoading({ loadingState: false, key: "voiceProcessing" }))
+            analyzeTone(text)
+        }
         // eslint-disable-next-line
     }, [text]);
 
@@ -72,10 +77,9 @@ export default function Interview() {
     }
 
     const stopVoiceRecogniation = () => {
-        console.log(text, "text");
         stopListening();
         DISPATCH(updateLoading({ loadingState: false, key: "candidate" }))
-        textReset();
+        DISPATCH(updateLoading({ loadingState: true, key: "voiceProcessing" }))
     };
 
     const [timer, setTimer] = useState(null);
@@ -175,6 +179,27 @@ export default function Interview() {
                         <Box display={"flex"} gap={1} alignItems={"center"}>
                             <Typography variant="body1" color="white">
                                 Recording
+                            </Typography>
+                            <PuffLoader color="white" size={20} />
+                        </Box>
+                    </Box>
+                </Box>
+                {/* candidate audio processing */}
+                <Box
+                    display={`${voiceProcessing ? "flex" : "none"
+                        }`}
+                    justifyContent={"end"}
+                    marginBottom={4}
+                >
+                    <Box
+                        padding={1}
+                        borderRadius={2}
+                        bgcolor={APP_COLORS.CHAT_PRIMARY}
+                        sx={{ maxWidth: { xs: "90%", md: "70%", lg: "60%" } }}
+                    >
+                        <Box display={"flex"} gap={1} alignItems={"center"}>
+                            <Typography variant="body1" color="white">
+                                Precessing Vocals..
                             </Typography>
                             <PuffLoader color="white" size={20} />
                         </Box>

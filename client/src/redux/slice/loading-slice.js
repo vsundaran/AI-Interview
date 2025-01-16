@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
-    candidate: false
+    candidate: false,
+    voiceProcessing: false
 }
 
 export const loading = createSlice({

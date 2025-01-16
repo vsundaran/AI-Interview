@@ -19,7 +19,7 @@ const useTextToSpeech = (model = 'facebook/fastspeech2-en-ljspeech') => {
     let DISPATCH = useDispatch();
 
     const speak = useCallback(
-        async (text) => {
+        async (text, onAudioStart) => {
             if (!text.trim()) {
                 setError('Text input cannot be empty.');
                 return;
@@ -36,6 +36,23 @@ const useTextToSpeech = (model = 'facebook/fastspeech2-en-ljspeech') => {
                 const audioUrl = URL.createObjectURL(audioBlob);
 
                 const audio = new Audio(audioUrl);
+
+                // Preload audio before playing
+                audio.addEventListener('canplaythrough', () => {
+                    setIsLoading(false);
+                    audio.play();
+                    if (onAudioStart) {
+                        onAudioStart();
+                    }
+                });
+
+                // // Trigger callback when audio starts playing
+                // audio.addEventListener('play', () => {
+                //     if (onAudioStart) {
+                //         onAudioStart();
+                //     }
+                // });
+
                 audio.addEventListener('ended', () => {
                     DISPATCH(updateLoading({ loadingState: true, key: "candidate" }));
                 });

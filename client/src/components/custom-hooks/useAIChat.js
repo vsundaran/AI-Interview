@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { HfInference } from "@huggingface/inference";
-import { useSpeech } from '../../context/SpeechContext';
 import useTextToSpeech from './useTextToSpeech';
 
 const client = new HfInference(process.env.REACT_APP_HUGGING_FACE_API_KEY);
@@ -59,19 +58,28 @@ const useAIChat = () => {
             // Remove "Question: " and surrounding quotes
             parsedContent = parsedContent.replace(/^Question:\s*/, '').replace(/^"|"$/g, '');
 
-            // Update conversation history with AI response
-            setChatHistory((prevHistory) => [
-                ...prevHistory,
-                { role: 'ai', content: parsedContent }
-            ]);
+            // Play audio and update chat history after audio starts
+            speak(parsedContent, () => {
+                setChatHistory((prevHistory) => [
+                    ...prevHistory,
+                    { role: 'ai', content: parsedContent }
+                ]);
+                setIsLoading(false);
+            });
 
-            speak(parsedContent);
+            // // Update conversation history with AI response
+            // setChatHistory((prevHistory) => [
+            //     ...prevHistory,
+            //     { role: 'ai', content: parsedContent }
+            // ]);
+
         } catch (err) {
             console.error('Error communicating with AI:', err);
             setError('Failed to fetch AI response');
-        } finally {
-            setIsLoading(false);
         }
+        // finally {
+
+        // }
     };
 
     return {
