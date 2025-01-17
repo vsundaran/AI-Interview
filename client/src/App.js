@@ -20,8 +20,6 @@ import { NoRoute } from "./components/views/no-route";
 //Redux
 import { Provider } from 'react-redux'
 import { store } from "./redux/store/store";
-import { SpeechProvider } from "./context/SpeechContext";
-import BodyLanguageAnalyzer from "./components/elements/body-language-analyzer/body-language-analyzer";
 import Test from "./components/views/test";
 
 // import SpeechToText from "./components/views/speech";
@@ -40,20 +38,17 @@ function App() {
           {/* Place your header */}
           <AppHeader />
           <Box marginTop={3}>
-            <SpeechProvider>
-              <Router>
-                <Suspense fallback={<Loading />}>
-                  <Routes>
-                    <Route element={<Home />} path={`${ROUTE_URL.HOME}`} />
-                    <Route element={<Interview />} path={`${ROUTE_URL.INETRVIEW}`} />
-                    <Route element={<Dashboard />} path={`${ROUTE_URL.DASHBOARD}`} />
-                    <Route element={<NoRoute />} path={`${ROUTE_URL.NO_ROUTE}`} />
-                    <Route element={<BodyLanguageAnalyzer />} path={`/BodyLanguageAnalyzer`} />
-                    <Route element={<Test />} path={`/Test`} />
-                  </Routes>
-                </Suspense>
-              </Router>
-            </SpeechProvider>
+            <Router>
+              <Suspense fallback={<Loading />}>
+                <Routes>
+                  <Route element={<Home />} path={`${ROUTE_URL.HOME}`} />
+                  <Route element={<Interview />} path={`${ROUTE_URL.INETRVIEW}`} />
+                  <Route element={<Dashboard />} path={`${ROUTE_URL.DASHBOARD}`} />
+                  <Route element={<NoRoute />} path={`${ROUTE_URL.NO_ROUTE}`} />
+                  <Route element={<Test />} path={`/Test`} />
+                </Routes>
+              </Suspense>
+            </Router>
           </Box>
         </Container>
       </Box>
