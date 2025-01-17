@@ -15,12 +15,14 @@ import { SyncLoader, PuffLoader } from "react-spinners";
 import { formatAIPrompt } from "../../utills/formatPrompt";
 
 //custom-hooks
-import useSilenceChecker from "./speech";
-import { useLocation } from "react-router-dom";
+import useSilenceChecker from "../custom-hooks/speech";
 import useAIChat from "../custom-hooks/useAIChat";
-import { updateLoading } from "../../redux/slice/loading-slice";
 import useToneAnalysis from "../custom-hooks/useToneAnalysis";
 import useVoiceRecorder from "../custom-hooks/useVoiceRecorder";
+
+import { useLocation } from "react-router-dom";
+import { updateLoading } from "../../redux/slice/loading-slice";
+import BodyLanguageAnalyzer from "../elements/body-language-analyzer/body-language-analyzer";
 
 export default function Interview() {
     let jobInfo = useSelector((state) => state.job_info);
@@ -62,7 +64,7 @@ export default function Interview() {
     }, [text]);
 
     useEffect(() => {
-        // The tone result should save on the backend or context for result
+        // The tone result should save on the backend or context for dashboard
         // eslint-disable-next-line
     }, [toneResult])
 
@@ -85,20 +87,19 @@ export default function Interview() {
     const [timer, setTimer] = useState(null);
 
     useEffect(() => {
-        console.log("isSpeaking", isSpeaking)
         if (candidate && isSpeaking && isListening) {
-            console.log("User continious the interview")
+            //    "User continious the interview"
             if (timer) {
                 clearTimeout(timer)
             }
         };
         if (candidate && isSpeaking && !isListening) {
-            console.log("Voice recording started")
+            // "Voice recording started"
             startVoiceRecogniation();
         } else {
             if (!isSpeaking && candidate && isListening) {
                 setTimer(perv => setTimeout(() => {
-                    console.log("User not spok for last 10 seconds, recording stoped")
+                    // "User not spok for last 10 seconds, recording stoped"
                     stopVoiceRecogniation()
                 }, 10000))
             }
@@ -221,6 +222,7 @@ export default function Interview() {
                         </Typography>
                     </Box>
                 </Box>
+                <BodyLanguageAnalyzer />
             </Box>
         </Box>
     );
