@@ -35,14 +35,35 @@ const useAIChat = () => {
         setError(null);
 
         try {
-            const chatCompletion = await client.chatCompletion({
-                model: "mistralai/Mistral-7B-Instruct-v0.3",
-                messages: [{ role: 'user', content: userMessage }],
-                max_tokens: 500
-            });
+            // const chatCompletion = await client.chatCompletion({
+            //     model: "mistralai/Mistral-7B-Instruct-v0.3",
+            //     messages: [{ role: 'user', content: userMessage }],
+            //     max_tokens: 500
+            // });
+            const response = await fetch(
+                "https://openrouter.ai/api/v1/chat/completions",
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${'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'}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        model: "deepseek/deepseek-r1:free",
+                        messages: [{ role: "user", content: userMessage }],
+                        stream: false, // Enable streaming
+                    }),
+                }
+            );
+
+            // Get the response body as a readable stream
+            // if (!response.body) return;
+            // const reader = response.body.getReader();
+            // const decoder = new TextDecoder("utf-8");
+            // let fullText = "";
 
             // Get AI response
-            const aiResponse = chatCompletion.choices[0]?.message?.content || 'No response from AI';
+            const aiResponse = response.choices[0]?.message?.content || 'No response from AI';
 
             let parsedContent;
 

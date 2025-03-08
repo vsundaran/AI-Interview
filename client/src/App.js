@@ -23,6 +23,7 @@ import { store } from "./redux/store/store";
 import Test from "./components/views/test";
 import GoogleAuth from "./components/views/GoogleAuth";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import BodyLanguageAnalyzer from "./components/elements/body-language-analyzer/body-language-analyzer";
 
 // import SpeechToText from "./components/views/speech";
 
@@ -40,7 +41,7 @@ function App() {
           <Container maxWidth="lg">
             {/* Place your header */}
             <AppHeader />
-            <GoogleAuth />
+            {/* <GoogleAuth /> */}
             <Box marginTop={3}>
               <Router>
                 <Suspense fallback={<Loading />}>
@@ -50,6 +51,7 @@ function App() {
                     <Route element={<Dashboard />} path={`${ROUTE_URL.DASHBOARD}`} />
                     <Route element={<NoRoute />} path={`${ROUTE_URL.NO_ROUTE}`} />
                     <Route element={<Test />} path={`/Test`} />
+                    <Route element={<BodyLanguageAnalyzer />} path={`/BodyLanguageAnalyzer`} />
                   </Routes>
                 </Suspense>
               </Router>
